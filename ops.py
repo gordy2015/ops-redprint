@@ -17,5 +17,5 @@ api = Api(app)
 # admin.add_view(ModelView(Map, db.session, name="公网映射", category="运维信息记录"))
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host="0.0.0.0")
 

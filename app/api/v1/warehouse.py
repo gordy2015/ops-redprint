@@ -34,15 +34,15 @@ def checkhost():
     if w.count() > 0:
         w.update(data)
         result = {"code":"200", "update":"%s %s"%(w.count(), data['hostip'])}
-        return jsonify(result)
     else:
-        record = Host(hostip=data['hostip'], hostname=data['hostname'],dist=data['dist'],uname=data['uname'], sysdisk=data['sysdisk'],datadisk=data['datadisk'],memtotal=data['memtotal'], cpucore=data['cpucore'], mark=data['mark'], addtime=data['addtime'])
+        # record = Host(hostip=data['hostip'], hostname=data['hostname'],dist=data['dist'],uname=data['uname'], sysdisk=data['sysdisk'],datadisk=data['datadisk'],memtotal=data['memtotal'], cpucore=data['cpucore'], mark=data['mark'], addtime=data['addtime'])
+        record = Host(hostip=data['hostip'])
         try:
             db.session.add(record)
             db.session.commit()
-            code = 200
-            result = "SUCCESS"
+            Host.query.filter_by(hostip=data['hostip']).update(data)
+            result = {"code": "200", "create": "%s %s" % (w.count(), data['hostip'])}
         except:
-            result = "FAILE"
-            code = 600
-    return jsonify(marshal(data, HostArgs.resource_field))
+            result = {"code": "600", "msg": "CREATE FAILE"}
+    #jsonify(marshal(data, HostArgs.resource_field))
+    return jsonify(result)

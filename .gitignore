@@ -1,0 +1,9 @@
+/migrations/*
+migrations/*
+/.idea
+/script/*
+/log/*
+__pycache__/*
+/__pycache__/*
+/config/setting.py
+/config/secure.py

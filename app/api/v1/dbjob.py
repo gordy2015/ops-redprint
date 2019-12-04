@@ -5,7 +5,7 @@ from flask_restful import reqparse, Resource
 from flask_restful import fields, marshal_with, marshal
 from app.libs.redprint import Redprint
 from app.api.v1.models import db, Dbbak, Myrestore, Morestore
-
+from app.api.v1.args import DbbakArgs, MyrestoreArgs, MorestoreArgs
 
 api = Redprint('dbjob')
 
@@ -32,41 +32,7 @@ def getmyrestore():
 #Mysql备份记录
 @api.route('/createdbbak', methods=['POST'])
 def createdbbak():
-    resource_field = {  # 先定义好返回哪些参数
-        'ip': fields.String,  # 参数的数据类型
-        'bakname': fields.String,
-        'bakdir': fields.String,
-        'md5sum': fields.String,
-        'filesize': fields.Integer,
-        'starttime': fields.String,
-        'stoptime': fields.String,
-        'costtime': fields.Integer,
-        'baktype': fields.String,
-        'incsize': fields.Integer,
-        'has_restore': fields.Integer,
-        'to_f01': fields.Integer,
-        'to_f01_costtime': fields.Integer,
-        'mark': fields.String,
-        'dbname': fields.String,
-    }
-
-    parser = reqparse.RequestParser()
-    parser.add_argument('ip', type=str, help='ip must x.x.x.x')
-    parser.add_argument('bakname', type=str)
-    parser.add_argument('bakdir', type=str)
-    parser.add_argument('md5sum', type=str)
-    parser.add_argument('filesize', type=int)
-    parser.add_argument('starttime', type=str)
-    parser.add_argument('stoptime', type=str)
-    parser.add_argument('costtime', type=int)
-    parser.add_argument('baktype', type=int)
-    parser.add_argument('incsize', type=int)
-    parser.add_argument('has_restore', type=int)
-    parser.add_argument('to_f01', type=int)
-    parser.add_argument('to_f01_costtime', type=int)
-    parser.add_argument('mark', type=str)
-    parser.add_argument('dbname', type=str)
-    args = parser.parse_args(strict=True)
+    args = DbbakArgs.dbbakparser()
     # j = args.__repr__()
     data = {}
     for k,v in args.items():
@@ -88,35 +54,13 @@ def createdbbak():
         result = "FAILE"
         code = 600
     # res = result + jsonify(marshal(data, resource_field))
-    return jsonify(marshal(data, resource_field))
+    return jsonify(marshal(data, DbbakArgs.resource_field))
 
 
 #MySQL还原记录
 @api.route('/createmyrestore', methods=['POST'])
 def createmyrestore():
-    resource_field = {  # 先定义好返回哪些参数
-        'restorefile': fields.String,  # 参数的数据类型
-        'dbname': fields.String,
-        'data_length': fields.Integer,
-        'index_data_length': fields.Integer,
-        'sqllines': fields.Integer,
-        'starttime': fields.String,
-        'stoptime': fields.String,
-        'costtime': fields.Integer
-    }
-
-    parser = reqparse.RequestParser()
-    parser.add_argument('restorefile', type=str)
-    parser.add_argument('dbname', type=str)
-    parser.add_argument('data_length', type=int)
-    parser.add_argument('index_data_length', type=int)
-    parser.add_argument('sqllines', type=int)
-    parser.add_argument('starttime', type=str)
-    parser.add_argument('stoptime', type=str)
-    parser.add_argument('costtime', type=int)
-    args = parser.parse_args(strict=True)
-    # print(args)
-    # j = args.__repr__()
+    args = MyrestoreArgs.myrestoreparser()
     data = {}
     for k,v in args.items():
         # print('=======',k,v)
@@ -138,31 +82,13 @@ def createmyrestore():
         result = "FAILE"
         code = 600
     # res = result + jsonify(marshal(data, resource_field))
-    return jsonify(marshal(data, resource_field))
+    return jsonify(marshal(data, MyrestoreArgs.resource_field))
 
 
 #Mongodb还原记录
 @api.route('/createmorestore', methods=['POST'])
 def createmorestore():
-    resource_field = {  # 先定义好返回哪些参数
-        'restorefile': fields.String,  # 参数的数据类型
-        'kj_count': fields.Integer,
-        'kj_storagesize': fields.Integer,
-        'starttime': fields.String,
-        'stoptime': fields.String,
-        'costtime': fields.Integer
-    }
-
-    parser = reqparse.RequestParser()
-    parser.add_argument('restorefile', type=str)
-    parser.add_argument('kj_count', type=int)
-    parser.add_argument('kj_storagesize', type=int)
-    parser.add_argument('starttime', type=str)
-    parser.add_argument('stoptime', type=str)
-    parser.add_argument('costtime', type=int)
-
-    args = parser.parse_args(strict=True)
-    # j = args.__repr__()
+    args = MorestoreArgs.morestoreparser()
     data = {}
     for k,v in args.items():
         if k == "starttime" or k == "stoptime":
@@ -182,4 +108,4 @@ def createmorestore():
         result = "FAILE"
         code = 600
     # res = result + jsonify(marshal(data, resource_field))
-    return jsonify(marshal(data, resource_field))
+    return jsonify(marshal(data, MorestoreArgs.resource_field))

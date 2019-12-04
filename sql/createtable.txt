@@ -1,0 +1,102 @@
+create database ops;
+
+
+CREATE TABLE `ops_dbbak` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip` varchar(80) DEFAULT NULL,
+  `dbname` varchar(20) DEFAULT NULL,
+  `bakname` varchar(100) DEFAULT NULL,
+  `bakdir` varchar(150) DEFAULT NULL,
+  `md5sum` varchar(50) DEFAULT NULL,
+  `filesize` bigint(50) DEFAULT NULL,
+  `starttime` datetime DEFAULT NULL,
+  `stoptime` datetime DEFAULT NULL,
+  `costtime` int(11) DEFAULT NULL,
+  `baktype` int(11) DEFAULT NULL,
+  `incsize` bigint(20) DEFAULT NULL,
+  `has_restore` tinyint(1) DEFAULT NULL,
+  `to_f01` int(11) DEFAULT NULL,
+  `to_f01_costtime` bigint(50) DEFAULT NULL,
+  `mark` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1889 DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `ops_bakfile` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip` varchar(20) DEFAULT NULL,
+  `filename` varchar(50) DEFAULT NULL,
+  `bakdir` varchar(150) DEFAULT NULL,
+  `md5sum` bigint(20) DEFAULT NULL,
+  `filesize` bigint(20) DEFAULT NULL,
+  `starttime` datetime DEFAULT NULL,
+  `stoptime` datetime DEFAULT NULL,
+  `costtime` int(11) DEFAULT NULL,
+  `baktype` int(11) DEFAULT NULL,
+  `incsize` bigint(20) DEFAULT NULL,
+  `has_restore` tinyint(1) DEFAULT NULL,
+  `mark` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+CREATE TABLE `ops_myrestore` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `restorefile` varchar(150) DEFAULT NULL,
+  `data_length` bigint(20) DEFAULT NULL,
+  `index_data_length` bigint(20) DEFAULT NULL,
+  `sqllines` bigint(255) DEFAULT NULL,
+  `starttime` datetime DEFAULT NULL,
+  `stoptime` datetime DEFAULT NULL,
+  `costtime` int(11) DEFAULT NULL,
+  `dbname` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=688 DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `ops_morestore` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `restorefile` varchar(50) DEFAULT NULL COMMENT '被还原的备份文件',
+  `kj_count` int(100) DEFAULT NULL COMMENT 'kangjia_report集合的文档数量',
+  `kj_storagesize` bigint(255) DEFAULT NULL COMMENT 'kangjia_report集合的大小',
+  `starttime` datetime DEFAULT NULL,
+  `stoptime` datetime DEFAULT NULL,
+  `costtime` int(30) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=357 DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `ops_map` (
+  `id` int(4) NOT NULL AUTO_INCREMENT,
+  `mark` varchar(20) DEFAULT '---',
+  `access` varchar(40) DEFAULT NULL,
+  `ext_ip` varchar(20) DEFAULT '---',
+  `ext_port` varchar(20) DEFAULT '---',
+  `int_ip` varchar(25) DEFAULT '---',
+  `int_port` varchar(20) DEFAULT '---',
+  `is_proxy` int(4) DEFAULT '0',
+  `realip` varchar(40) DEFAULT '---',
+  `is_used` int(4) DEFAULT '1',
+  `addtime` datetime DEFAULT CURRENT_TIMESTAMP,
+  `remark` varchar(50) DEFAULT '---',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `ops_host` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `hostip` varchar(40) DEFAULT NULL,
+  `hostname` varchar(30) DEFAULT NULL,
+  `dist` varchar(30) DEFAULT NULL,
+  `uname` varchar(60) DEFAULT NULL,
+  `sysdisk` int(10) DEFAULT NULL,
+  `datadisk` int(10) DEFAULT NULL,
+  `memtotal` int(10) DEFAULT NULL,
+  `cpucore` int(10) DEFAULT NULL,
+  `mark` varchar(50) DEFAULT NULL,
+  `addtime` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `hostid` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+

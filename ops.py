@@ -1,5 +1,6 @@
 from app.app import create_app
 from flask_restful import Api, Resource
+# from flask_pymongo import PyMongo
 
 # from flask_admin import Admin
 # from flask_admin.contrib.sqla import ModelView
@@ -7,6 +8,7 @@ from flask_restful import Api, Resource
 
 app = create_app()
 api = Api(app)
+#mongo = PyMongo(app)
 
 #flask-admin
 # admin = Admin(app, name='ops', template_mode='bootstrap3')

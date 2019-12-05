@@ -18,7 +18,7 @@ class DbbakArgs(object):
         'mark': fields.String,
         'dbname': fields.String,
     }
-    def dbbakparser():
+    def dataparser():
         parser = reqparse.RequestParser()
         parser.add_argument('ip', type=str, help='ip must x.x.x.x')
         parser.add_argument('bakname', type=str)
@@ -49,7 +49,7 @@ class MyrestoreArgs(object):
         'stoptime': fields.String,
         'costtime': fields.Integer
     }
-    def myrestoreparser():
+    def dataparser():
         parser = reqparse.RequestParser()
         parser.add_argument('restorefile', type=str)
         parser.add_argument('dbname', type=str)
@@ -71,7 +71,7 @@ class MorestoreArgs(object):
         'stoptime': fields.String,
         'costtime': fields.Integer
     }
-    def morestoreparser():
+    def dataparser():
         parser = reqparse.RequestParser()
         parser.add_argument('restorefile', type=str)
         parser.add_argument('kj_count', type=int)
@@ -95,7 +95,7 @@ class HostArgs(object):
         'mark': fields.String,
         'addtime': fields.String
     }
-    def hostparser():
+    def dataparser():
         parser = reqparse.RequestParser()
         parser.add_argument('hostip', type=str, required=True)
         parser.add_argument('hostname', type=str)
@@ -106,5 +106,33 @@ class HostArgs(object):
         parser.add_argument('memtotal', type=int)
         parser.add_argument('cpucore', type=int)
         parser.add_argument('mark', type=str)
+        parser.add_argument('addtime', type=str)
+        return parser.parse_args(strict=True)
+
+
+class DetailProcessArgs(object):
+    resource_field = {  # 先定义好返回哪些参数
+        'hostip': fields.String,  # 参数的数据类型
+        'user': fields.String,
+        'pid': fields.Integer,
+        'protocol': fields.String,
+        'port': fields.Integer,
+        'process': fields.String,
+        'process_cpu_usage': fields.Float,
+        'process_mem_usage': fields.Float,
+        'latest': fields.Integer,
+        'addtime': fields.String
+    }
+    def dataparser():
+        parser = reqparse.RequestParser()
+        parser.add_argument('hostip', type=str, required=True)
+        parser.add_argument('user', type=str)
+        parser.add_argument('pid', type=int)
+        parser.add_argument('protocol', type=str)
+        parser.add_argument('port', type=int)
+        parser.add_argument('process', type=str)
+        parser.add_argument('process_cpu_usage', type=float)
+        parser.add_argument('process_mem_usage', type=float)
+        parser.add_argument('latest', type=int)
         parser.add_argument('addtime', type=str)
         return parser.parse_args(strict=True)

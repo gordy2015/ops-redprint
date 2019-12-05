@@ -32,7 +32,7 @@ def getmyrestore():
 #Mysql备份记录
 @api.route('/createdbbak', methods=['POST'])
 def createdbbak():
-    args = DbbakArgs.dbbakparser()
+    args = DbbakArgs.dataparser()
     # j = args.__repr__()
     data = {}
     for k,v in args.items():
@@ -60,7 +60,7 @@ def createdbbak():
 #MySQL还原记录
 @api.route('/createmyrestore', methods=['POST'])
 def createmyrestore():
-    args = MyrestoreArgs.myrestoreparser()
+    args = MyrestoreArgs.dataparser()
     data = {}
     for k,v in args.items():
         # print('=======',k,v)
@@ -88,7 +88,7 @@ def createmyrestore():
 #Mongodb还原记录
 @api.route('/createmorestore', methods=['POST'])
 def createmorestore():
-    args = MorestoreArgs.morestoreparser()
+    args = MorestoreArgs.dataparser()
     data = {}
     for k,v in args.items():
         if k == "starttime" or k == "stoptime":

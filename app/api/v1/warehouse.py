@@ -1,10 +1,10 @@
 from app.libs.redprint import Redprint
-from flask import jsonify
+from flask import jsonify, request
 from flask_restful import reqparse, marshal, fields, Resource
 import time,sys
 from app.api.v1.models import db, Host
-from app.api.v1.args import HostArgs
-
+from app.api.v1.args import HostArgs, DetailProcessArgs
+from app.libs.tomongo import to_mongodb
 api = Redprint('warehouse')
 
 @api.route('',methods=['GET'])
@@ -20,7 +20,7 @@ def gethost():
 #虚拟机主机硬件配置，OS等记录
 @api.route('/checkhost', methods=['POST'])
 def checkhost():
-    args = HostArgs.hostparser()
+    args = HostArgs.dataparser()
     # j = args.__repr__()
     data = {}
     for k, v in args.items():
@@ -46,3 +46,32 @@ def checkhost():
             result = {"code": "600", "msg": "CREATE FAILE"}
     #jsonify(marshal(data, HostArgs.resource_field))
     return jsonify(result)
+
+
+@api.route('/getmon',methods=['GET'])
+def getmon():
+    result = to_mongodb.find_one({"user" : "rpc"})
+    print(type(result))
+    return "abc2"
+
+
+@api.route('/createdetail',methods=['POST'])
+def createdetail():
+    # args = DetailProcessArgs.dataparser()
+    # data = {}
+    # for k, v in args.items():
+    #     if v:
+    #         if k == "addtime":
+    #             timeArray = time.localtime(int(v))
+    #             v = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+    #         data[k] = v
+
+    data = request.json.get('data')
+    r = request.args.get('data')
+    print(type(data))
+    print(type(r ),r)
+    # for i in data:
+    #     print(i)
+    #result = to_mongodb.insert_one(data)
+    result = "abc2"
+    return result

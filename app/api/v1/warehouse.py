@@ -1,7 +1,7 @@
 from app.libs.redprint import Redprint
 from flask import jsonify, request
 from flask_restful import reqparse, marshal, fields, Resource
-import time,sys
+import time, sys, json
 from app.api.v1.models import db, Host
 from app.api.v1.args import HostArgs, DetailProcessArgs
 from app.libs.tomongo import to_mongodb
@@ -67,11 +67,46 @@ def createdetail():
     #         data[k] = v
 
     data = request.json.get('data')
-    r = request.args.get('data')
-    print(type(data))
-    print(type(r ),r)
-    # for i in data:
-    #     print(i)
-    #result = to_mongodb.insert_one(data)
-    result = "abc2"
-    return result
+    data = data.replace('[', '').replace(']', '')
+    # print(type(data), data)
+    data = data.split('},')
+    print(type(data), data)
+    newlist = []
+    for i in data:
+        if not i.endswith('}'):
+            i = i + '}'
+            # newline = json.loads(newline.replace('\'','\"'))
+        newlist.append(i)
+    print("---------",type(newlist), json.loads(newlist[0].replace('\'','\"'))['hostip'])
+    getip = json.loads(newlist[0].replace('\'','\"'))['hostip']
+    result = to_mongodb.update_many({"hostip": getip}, {'$set': {"latest": "0"}})
+    print("+++++++++++++++",result)
+    for i in newlist:
+        print(type(i),i)
+        record = json.loads(i.replace('\'','\"'))
+        # print("**********",type(record), record['port'])
+
+        print("**********", result)
+        w = to_mongodb.find({"hostip":record['hostip'],"port":record["port"],"protocol":record["protocol"],"pid":record["pid"],"process":record["process"]})
+        if w.count() == 0:
+            record['change'] = "0"
+
+            result = to_mongodb.insert_one(record)
+            print("===========",result)
+        else:
+            print(w.count())
+            i = to_mongodb.find_one({"hostip":record['hostip'],"port":record["port"],"protocol":record["protocol"],"pid":record["pid"],"process":record["process"]})
+            a = to_mongodb.find({"hostip": record['hostip'], "port": record["port"], "protocol": record["protocol"],"pid": record["pid"], "process": record["process"], "process_cpu_usage":record["process_cpu_usage"], "process_mem_usage":record["process_mem_usage"]})
+
+            if a.count() == 0:
+                newchange = str(int(i["change"]) + int(1))
+            else:
+                newchange = i["change"]
+            print("&&&&&&&&&&&&&&&&&&&&&&&&&&", newchange)
+            result = to_mongodb.update_one({"hostip":record['hostip'],"port":record["port"],"protocol":record["protocol"],"pid":record["pid"],"process":record["process"]}, {'$set': {"latest": "1", "process_cpu_usage":record["process_cpu_usage"], "process_mem_usage":record["process_mem_usage"], "change":newchange}})
+            print("**********", result)
+
+
+    # result = to_mongodb.insert_many(newlist)
+    # print(result)
+    return "abc2"

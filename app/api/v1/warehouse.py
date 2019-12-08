@@ -3,7 +3,7 @@ from flask import jsonify, request
 from flask_restful import reqparse, marshal, fields, Resource
 import time, sys, json
 from app.api.v1.models import db, Host
-from app.api.v1.args import HostArgs, DetailProcessArgs
+from app.api.v1.args import HostArgs
 from app.libs.tomongo import to_mongodb
 api = Redprint('warehouse')
 

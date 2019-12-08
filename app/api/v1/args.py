@@ -110,29 +110,30 @@ class HostArgs(object):
         return parser.parse_args(strict=True)
 
 
-class DetailProcessArgs(object):
-    resource_field = {  # 先定义好返回哪些参数
-        'hostip': fields.String,  # 参数的数据类型
-        'user': fields.String,
-        'pid': fields.Integer,
-        'protocol': fields.String,
-        'port': fields.Integer,
-        'process': fields.String,
-        'process_cpu_usage': fields.Float,
-        'process_mem_usage': fields.Float,
-        'latest': fields.Integer,
-        'addtime': fields.String
-    }
-    def dataparser():
-        parser = reqparse.RequestParser()
-        parser.add_argument('hostip', type=str, required=True)
-        parser.add_argument('user', type=str)
-        parser.add_argument('pid', type=int)
-        parser.add_argument('protocol', type=str)
-        parser.add_argument('port', type=int)
-        parser.add_argument('process', type=str)
-        parser.add_argument('process_cpu_usage', type=float)
-        parser.add_argument('process_mem_usage', type=float)
-        parser.add_argument('latest', type=int)
-        parser.add_argument('addtime', type=str)
-        return parser.parse_args(strict=True)
+#用不上，使用request.json.get获取了post数据
+# class DetailProcessArgs(object):
+    # resource_field = {  # 先定义好返回哪些参数
+    #     'hostip': fields.String,  # 参数的数据类型
+    #     'user': fields.String,
+    #     'pid': fields.Integer,
+    #     'protocol': fields.String,
+    #     'port': fields.Integer,
+    #     'process': fields.String,
+    #     'process_cpu_usage': fields.Float,
+    #     'process_mem_usage': fields.Float,
+    #     'latest': fields.Integer,
+    #     'addtime': fields.String
+    # }
+    # def dataparser():
+    #     parser = reqparse.RequestParser()
+    #     parser.add_argument('hostip', type=str, required=True)
+    #     parser.add_argument('user', type=str)
+    #     parser.add_argument('pid', type=int)
+    #     parser.add_argument('protocol', type=str)
+    #     parser.add_argument('port', type=int)
+    #     parser.add_argument('process', type=str)
+    #     parser.add_argument('process_cpu_usage', type=float)
+    #     parser.add_argument('process_mem_usage', type=float)
+    #     parser.add_argument('latest', type=int)
+    #     parser.add_argument('addtime', type=str)
+    #     return parser.parse_args(strict=True)

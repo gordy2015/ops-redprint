@@ -57,56 +57,93 @@ def getmon():
 
 @api.route('/createdetail',methods=['POST'])
 def createdetail():
-    # args = DetailProcessArgs.dataparser()
-    # data = {}
-    # for k, v in args.items():
-    #     if v:
-    #         if k == "addtime":
-    #             timeArray = time.localtime(int(v))
-    #             v = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-    #         data[k] = v
-
     data = request.json.get('data')
-    data = data.replace('[', '').replace(']', '')
-    # print(type(data), data)
     data = data.split('},')
-    print(type(data), data)
-    newlist = []
+    # print(type(data), data)
+
+    #取hostip，并在开始前更新老的state为0
+    data1 = data[0]
+    if not data1.endswith('}'):
+        data1 = data1 + '}'
+    if data1.startswith('[{'):
+        data1 = data1.split('[')[1]
+    if data1.endswith(']}'):
+        data1 = data1.split(']')[0]
+
+    #获取hostip
+    getip = json.loads(data1.replace('\'','\"'))['hostip']
+
+    #开始前，把老的所有记录的state更新为0
+    result = to_mongodb.update_many({"hostip": getip}, {'$set': {"state": "0"}})
+
+    #逐个对比后insert，若有老的记录存在，state更新为1，不存在继续为0
     for i in data:
         if not i.endswith('}'):
             i = i + '}'
-            # newline = json.loads(newline.replace('\'','\"'))
-        newlist.append(i)
-    print("---------",type(newlist), json.loads(newlist[0].replace('\'','\"'))['hostip'])
-    getip = json.loads(newlist[0].replace('\'','\"'))['hostip']
-    result = to_mongodb.update_many({"hostip": getip}, {'$set': {"latest": "0"}})
-    print("+++++++++++++++",result)
-    for i in newlist:
-        print(type(i),i)
+        if i.startswith('[{'):
+            i = i.split('[')[1]
+        if i.endswith(']}'):
+            i = i.split(']')[0]
+        # print("========",type(i),type(json.loads(i.replace('\'','\"'))))
         record = json.loads(i.replace('\'','\"'))
-        # print("**********",type(record), record['port'])
 
-        print("**********", result)
-        w = to_mongodb.find({"hostip":record['hostip'],"port":record["port"],"protocol":record["protocol"],"pid":record["pid"],"process":record["process"]})
+        w = to_mongodb.find(
+            {"hostip": record['hostip'], "port": record["port"], "protocol": record["protocol"], "pid": record["pid"],
+             "process": record["process"]})
         if w.count() == 0:
-            record['change'] = "0"
-
+            record['change_usage'] = "0"
+            record['change_state'] = "0"
+            record['check_state'] = "1"
+            # record['checktime'] = record['addtime']
             result = to_mongodb.insert_one(record)
-            print("===========",result)
+            # print("===========", result)
         else:
-            print(w.count())
-            i = to_mongodb.find_one({"hostip":record['hostip'],"port":record["port"],"protocol":record["protocol"],"pid":record["pid"],"process":record["process"]})
-            a = to_mongodb.find({"hostip": record['hostip'], "port": record["port"], "protocol": record["protocol"],"pid": record["pid"], "process": record["process"], "process_cpu_usage":record["process_cpu_usage"], "process_mem_usage":record["process_mem_usage"]})
+            # print(w.count())
+            getlast = to_mongodb.find_one(
+                {"hostip": record['hostip'], "port": record["port"], "protocol": record["protocol"], "pid": record["pid"],
+                "process": record["process"]})
 
-            if a.count() == 0:
-                newchange = str(int(i["change"]) + int(1))
-            else:
-                newchange = i["change"]
-            print("&&&&&&&&&&&&&&&&&&&&&&&&&&", newchange)
-            result = to_mongodb.update_one({"hostip":record['hostip'],"port":record["port"],"protocol":record["protocol"],"pid":record["pid"],"process":record["process"]}, {'$set': {"latest": "1", "process_cpu_usage":record["process_cpu_usage"], "process_mem_usage":record["process_mem_usage"], "change":newchange}})
-            print("**********", result)
+            #对比CPU和内存使用率
+            diffusage = to_mongodb.find(
+                {"hostip": record['hostip'], "port": record["port"], "protocol": record["protocol"], "pid": record["pid"],
+                 "process": record["process"], "process_cpu_usage": record["process_cpu_usage"],
+                 "process_mem_usage": record["process_mem_usage"]})
+            # print(a.count())
 
+            # 若有cpu或内存使用率的变更，change_usage值加1
+            newchange_usage = getlast["change_usage"]
+            if diffusage.count() == 0:
+                newchange_usage = str(int(getlast["change_usage"]) + int(1))
 
-    # result = to_mongodb.insert_many(newlist)
-    # print(result)
-    return "abc2"
+            #对比上次的check_state，如果上次为0，则change_state值加1
+            newchange_state = getlast['change_state']
+            # print("------>", getlast['check_state'])
+            if getlast["check_state"] == "0":
+                newchange_state = str(int(getlast['change_state']) + int(1))
+
+            newcheck_state = "1"
+
+            result = to_mongodb.update_one(
+                {"hostip": record['hostip'], "port": record["port"], "protocol": record["protocol"], "pid": record["pid"],
+                 "process": record["process"]}, {'$set': {"state": "1", "process_cpu_usage": record["process_cpu_usage"],
+                                                          "process_mem_usage": record["process_mem_usage"],
+                                                          "change_usage": newchange_usage, "checktime": record['checktime'],
+                                                          "change_state": newchange_state, "check_state": newcheck_state}})
+            # print("**********", result)
+
+    #最后检查state为0的
+    checkdown = to_mongodb.find(
+        {"hostip": record['hostip'], "state": "0"})
+    for i in checkdown:
+        # print(i)
+        #对比上次的check_state，如果上次为1，则change_state值加1
+        newchange_state = i["change_state"]
+        # print("======>", i['check_state'])
+        if i['check_state'] == "1":
+            newchange_state = str(int(i["change_state"]) + int(1))
+        to_mongodb.update_one({"hostip": getip, "state": "0", "port": i["port"], "protocol": i["protocol"], "pid": i["pid"],
+                 "process": i["process"]}, {'$set': {"check_state": "0", "change_state": newchange_state}})
+
+    # sys.exit()
+
+    return "detailprocess"

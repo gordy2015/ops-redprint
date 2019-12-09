@@ -4,7 +4,7 @@ from flask_restful import reqparse, marshal, fields, Resource
 import time, sys, json
 from app.api.v1.models import db, Host
 from app.api.v1.args import HostArgs
-from app.libs.tomongo import to_mongodb
+from app.libs.tomongo import to_mongodb, to_mongodb_ports
 api = Redprint('warehouse')
 
 @api.route('',methods=['GET'])
@@ -147,3 +147,67 @@ def createdetail():
     # sys.exit()
 
     return "detailprocess"
+
+
+@api.route('/hostports',methods=['POST'])
+def hostports():
+    hostip = request.json.get('hostip')
+    #有传入ip则只查传入IP的所有端口返回，没传入ip则查全部IP的所有端口记录到mongodb
+    if hostip:
+        data = to_mongodb.find({"hostip": hostip, "state": "1"})
+        # print(data.count())
+        ports = []
+        for i in data:
+            result = i['port']
+            # print(type(result), result)
+            if result not in ports:
+                ports.append(result)
+
+        ports = ", ".join(ports)
+        result = hostip + ": " + ports
+    else:
+        data = to_mongodb.find()
+        # print(data.count())
+        ip = []
+        for i in data:
+            result = i['hostip']
+            if result not in ip:
+                ip.append(result)
+
+        for i in ip:
+            data = to_mongodb.find({"hostip": i, "state": "1"})
+            print(data.count())
+            ports = []
+            for m in data:
+                result = m['port']
+                # print(type(result), result)
+                if result not in ports:
+                    ports.append(result)
+            ports = ", ".join(ports)
+            result = i + ": " + ports
+            # print(type(i), type(ports), i, ports)
+
+            record = {"hostip":i, "ports":ports}
+            # print(type(record),record)
+            s = to_mongodb_ports.find(record)
+            if s.count() == 0:
+                to_mongodb_ports.delete_one({"hostip":i})
+                result = to_mongodb_ports.insert_one(record)
+    return "hostports"
+
+
+#根据ip和端口查此端口的详细信息
+@api.route('/hostportdetail',methods=['POST'])
+def hostportdetail():
+    hostip = request.json.get('hostip')
+    port = request.json.get('port')
+    data = to_mongodb.find({"hostip": hostip, "port": port})
+    # print(data.count())
+    portdetail = []
+    for i in data:
+        result = 'ports{user="%s", process="%s", pid="%s", port="%s", addtime="%s"} %s'%(i['user'], i['process'], i['pid'], i['port'], i['addtime'], i['state'])
+        # print(type(result), result)
+        if result not in portdetail:
+            portdetail.append(result)
+        portdetail = "\\n".join(portdetail)
+    return portdetail

@@ -196,7 +196,7 @@ def hostports():
     return "hostports"
 
 
-#根据ip和端口查此端口的详细信息
+#根据ip和端口查此端口的详细信息（prometheus-pushgateway格式)
 @api.route('/hostportdetail',methods=['POST'])
 def hostportdetail():
     hostip = request.json.get('hostip')

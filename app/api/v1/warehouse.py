@@ -103,19 +103,7 @@ def createdetail():
                 {"hostip": record['hostip'], "port": record["port"], "protocol": record["protocol"], "pid": record["pid"],
                 "process": record["process"]})
 
-            #对比CPU和内存使用率
-            diffusage = to_mongodb.find(
-                {"hostip": record['hostip'], "port": record["port"], "protocol": record["protocol"], "pid": record["pid"],
-                 "process": record["process"], "process_cpu_usage": record["process_cpu_usage"],
-                 "process_mem_usage": record["process_mem_usage"]})
-            # print(a.count())
-
-            # 若有cpu或内存使用率的变更，change_usage值加1
-            newchange_usage = getlast["change_usage"]
-            if diffusage.count() == 0:
-                newchange_usage = str(int(getlast["change_usage"]) + int(1))
-
-            #对比上次的check_state，如果上次为0，则change_state值加1
+            # 对比上次的check_state，如果上次为0，则change_state值加1
             newchange_state = getlast['change_state']
             # print("------>", getlast['check_state'])
             if getlast["check_state"] == "0":
@@ -123,12 +111,30 @@ def createdetail():
 
             newcheck_state = "1"
 
-            result = to_mongodb.update_one(
-                {"hostip": record['hostip'], "port": record["port"], "protocol": record["protocol"], "pid": record["pid"],
-                 "process": record["process"]}, {'$set': {"state": "1", "process_cpu_usage": record["process_cpu_usage"],
-                                                          "process_mem_usage": record["process_mem_usage"],
-                                                          "change_usage": newchange_usage, "checktime": record['checktime'],
-                                                          "change_state": newchange_state, "check_state": newcheck_state}})
+            if "process_cpu_usage" in record:
+                # 对比CPU和内存使用率
+                diffusage = to_mongodb.find(
+                    {"hostip": record['hostip'], "port": record["port"], "protocol": record["protocol"],
+                     "pid": record["pid"],
+                     "process": record["process"], "process_cpu_usage": record["process_cpu_usage"],
+                     "process_mem_usage": record["process_mem_usage"]})
+                # 若有cpu或内存使用率的变更，change_usage值加1
+                newchange_usage = getlast["change_usage"]
+                if diffusage.count() == 0:
+                    newchange_usage = str(int(getlast["change_usage"]) + int(1))
+
+                result = to_mongodb.update_one(
+                    {"hostip": record['hostip'], "port": record["port"], "protocol": record["protocol"], "pid": record["pid"],
+                     "process": record["process"]}, {'$set': {"state": "1", "process_cpu_usage": record["process_cpu_usage"],
+                                                              "process_mem_usage": record["process_mem_usage"],
+                                                              "change_usage": newchange_usage, "checktime": record['checktime'],
+                                                              "change_state": newchange_state, "check_state": newcheck_state}})
+            else:
+                result = to_mongodb.update_one(
+                    {"hostip": record['hostip'], "port": record["port"], "protocol": record["protocol"],
+                     "pid": record["pid"], "process": record["process"]},
+                    {'$set': {"state": "1", "checktime": record['checktime'],
+                              "change_state": newchange_state, "check_state": newcheck_state}})
             # print("**********", result)
 
     #最后检查state为0的
@@ -143,8 +149,6 @@ def createdetail():
             newchange_state = str(int(i["change_state"]) + int(1))
         to_mongodb.update_one({"hostip": getip, "state": "0", "port": i["port"], "protocol": i["protocol"], "pid": i["pid"],
                  "process": i["process"]}, {'$set': {"check_state": "0", "change_state": newchange_state}})
-
-    # sys.exit()
 
     return "detailprocess"
 

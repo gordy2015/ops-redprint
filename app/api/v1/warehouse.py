@@ -213,5 +213,6 @@ def hostportdetail():
         # print(type(result), result)
         if result not in portdetail:
             portdetail.append(result)
-        portdetail = "\\n".join(portdetail)
+    portdetail = "\\n".join(portdetail)
+    # print("----", portdetail)
     return portdetail

@@ -183,8 +183,8 @@ def hostports():
                 # print(type(result), result)
                 if result not in ports:
                     ports.append(result)
-            ports = ", ".join(ports)
-            result = i + ": " + ports
+            ports = ",".join(ports)
+            # result = i + ": " + ports
             # print(type(i), type(ports), i, ports)
 
             record = {"hostip":i, "ports":ports}
